@@ -1,0 +1,17 @@
+- hosts: all
+  become: true
+
+  tasks:
+    - name: repo 
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+
+    - name: docker.oi reg
+      apt_repository: repo='deb https://download.docker.com/linux/ubuntu bionic stable' state=present
+
+    - name:  apt and check
+      apt: name=docker-ce update_cache=yes
+    
+    - service: name=docker state=restarted

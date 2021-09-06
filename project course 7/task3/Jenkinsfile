@@ -1,0 +1,36 @@
+    pipeline {
+        agent any
+        stages {
+            stage('SCM') {
+            steps {
+                 checkout([
+            $class: 'GitSCM', 
+            branches: [[name: '*/master']], 
+            doGenerateSubmoduleConfigurations: false, 
+            extensions: [[$class: 'CleanCheckout']], 
+            submoduleCfg: [], 
+             userRemoteConfigs: [[credentialsId: '998653768-t42-454-847gr-a8vr3hdw2', url: 'https://github.com/partha0987/node_app.git']]
+
+
+
+    ])
+            }
+        }
+	stage('Stage2') {
+            steps {
+                    sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 89088438965.dkr.ecr.us-east-1.amazonaws.com"
+                    sh "docker build -t node_app ."
+                    sh "docker tag  node_app:latest 89088438965.dkr.ecr.us-east-1.amazonaws.com/ node_app:latest"
+                    sh "docker push 89088438965.dkr.ecr.us-east-1.amazonaws.com/ node_app:latest"
+            }
+
+
+        }
+            stage('Destage3 deploy') {
+                steps {
+                    sh "ssh app; docker stop  node_app ; docker run -d 89088438965.dkr.ecr.us-east-1.amazonaws.com/ node_app:latest"
+            }
+        }
+    }
+}
+
